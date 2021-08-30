@@ -3,6 +3,7 @@
 #include <sys/mman.h>
 #include "loadelf.h"
 #include "page.h"
+#include "signal.h"
 
 static void * handle;
 
