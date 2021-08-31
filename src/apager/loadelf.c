@@ -145,7 +145,7 @@ bool relocate_section(void * src, void * dst, Elf32_Shdr * shdr, Elf32_Sym * sym
         char * sym = strings + syms[ELF32_R_SYM(rel[j].r_info)].st_name;
         switch (ELF32_R_TYPE(rel[j].r_info)){
             case R_386_RELATIVE:
-                *(Elf32_Word*)(dst + rel[j].r_offset) = *(Elf32_Word*)(dst + rel[j].r_offset) + (Elf32_Word) dst;
+                *(Elf32_Word*)(dst + rel[j].r_offset) += (Elf32_Word) dst;
                 break;
             case R_386_JMP_SLOT:
             case R_386_GLOB_DAT:

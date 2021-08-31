@@ -1,5 +1,6 @@
 #include <sys/mman.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "page.h"
 
 static void * map_addr;
@@ -66,7 +67,11 @@ void * load_page(void * va){
         return NULL;
     }
 
-    mmap(page->va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+
+    lseek(file, page -> file_offset, SEEK_SET);
+    
+    read(file, page -> load_addr, page -> read_bytes);
 
     return page->va;
 }

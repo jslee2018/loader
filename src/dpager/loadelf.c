@@ -66,6 +66,21 @@ bool load_segment(void * src, void ** load_addr){
                 return false;
             }
 
+            int total_read_bytes = phdr[i].p_filesz;
+            int l_addr = phdr[i].p_vaddr;
+
+            while(total_read_bytes > 0){
+                struct page * page = malloc(sizeof(struct page));
+                page -> load_addr = (int) get_map_addr() + l_addr;
+                page -> va = (int) get_map_addr() + l_addr & 0xfffff000;
+                page -> file_offset = phdr[i].p_offset;
+                page -> read_bytes = page -> va - page -> load_addr + PAGE_SIZE;
+
+                register_page(page);
+                total_read_bytes -= page -> read_bytes;
+                l_addr += page -> read_bytes;
+            }
+
             memcpy(*load_addr + phdr[i].p_vaddr, src + phdr[i].p_offset, phdr[i].p_filesz);
 
             if (!(phdr[i].p_flags & PF_W))
@@ -147,10 +162,12 @@ bool relocate_section(void * src, void * dst, Elf32_Shdr * shdr, Elf32_Sym * sym
         char * sym = strings + syms[ELF32_R_SYM(rel[j].r_info)].st_name;
         switch (ELF32_R_TYPE(rel[j].r_info)){
             case R_386_RELATIVE:
-                *(Elf32_Word*)(dst + rel[j].r_offset) = *(Elf32_Word*)(dst + rel[j].r_offset) + (Elf32_Word) dst;
+                load_page(dst + rel[j].r_offset);
+                *(Elf32_Word*)(dst + rel[j].r_offset) += (Elf32_Word) dst;
                 break;
             case R_386_JMP_SLOT:
             case R_386_GLOB_DAT:
+                load_page(dst + rel[j].r_offset);
                 *(Elf32_Word*)(dst + rel[j].r_offset) = (Elf32_Word)load_dl(sym);
                 break;
         }
