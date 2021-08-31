@@ -35,8 +35,6 @@ int main(int argc, char * argv[], char ** envp){
     length = lseek(file, 0, SEEK_END);
     lseek(file, 0, SEEK_SET);
 
-    // printf("length: %d\n", length);
-
     file_raw = mmap(0, length, PROT_READ, MAP_PRIVATE, file, 0);
 
     if(file_raw == -1)
