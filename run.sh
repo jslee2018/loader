@@ -1,14 +1,14 @@
 #!/bin/bash
 
-cd /home/workspace/src
+cd /home/workspace/src/apager
 make
 rm -f *.o
-mv ./loader ../loader
+mv ./loader ../../apager
 
-cd ../tests
+cd ../../tests
 make
 cd ..
 ls -1 ./tests/build | while read line; do
-    echo start $line
-    ./loader ./tests/build/$line
+    echo test apager with $line
+    ./apager ./tests/build/$line
 done

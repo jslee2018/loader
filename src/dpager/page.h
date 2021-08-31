@@ -3,9 +3,11 @@
 
 struct page{
     void * va;
+    void * load_addr;
     int file_offset;
     int size;
+    struct page * next;
 };
 
-void page_init(void);
+void page_init(int fd);
 void * get_map_addr(void);

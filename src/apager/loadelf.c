@@ -2,8 +2,6 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include "loadelf.h"
-#include "page.h"
-#include "signal.h"
 
 static void * handle;
 
@@ -151,12 +149,9 @@ bool relocate_section(void * src, void * dst, Elf32_Shdr * shdr, Elf32_Sym * sym
                 break;
             case R_386_JMP_SLOT:
             case R_386_GLOB_DAT:
-                // printf("relname %s\n", sym);
                 *(Elf32_Word*)(dst + rel[j].r_offset) = (Elf32_Word)load_dl(sym);
                 break;
         }
-
-        
     }
     return true;
 }

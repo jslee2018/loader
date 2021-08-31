@@ -32,7 +32,6 @@ int main(int argc, char * argv[], char ** envp){
         return -1;
     }
 
-
     length = lseek(file, 0, SEEK_END);
     lseek(file, 0, SEEK_SET);
 
