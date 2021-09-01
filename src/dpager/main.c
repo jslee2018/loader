@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 #include "loadelf.h"
 #include "call.h"
+#include "page.h"
+#include "signal.h"
 
 void bp(){
     return;
@@ -25,7 +27,11 @@ int main(int argc, char * argv[], char ** envp){
     
     file_name = argv[1];
 
+    register_handler();
+
     int file = open(file_name, O_RDONLY);
+
+    page_init(file);
 
     if(file == -1){
         printf("load file failed\n");

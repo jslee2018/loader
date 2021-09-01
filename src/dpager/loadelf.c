@@ -44,8 +44,9 @@ bool elf_check_valid(void * src){
 
 bool load_segment(void * src, void ** load_addr){
 
-    *load_addr = mmap(NULL, 1048576 * sizeof(char), PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-    memset(*load_addr, 0, 1048576 * sizeof(char));
+    *load_addr = get_map_addr();
+    // *load_addr = mmap(NULL, 1048576 * sizeof(char), PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    // memset(*load_addr, 0, 1048576 * sizeof(char));
 
     Elf32_Ehdr * ehdr = (Elf32_Ehdr *) src;
 
@@ -76,22 +77,23 @@ bool load_segment(void * src, void ** load_addr){
                 page -> file_offset = phdr[i].p_offset;
                 page -> read_bytes = page -> va - page -> load_addr + PAGE_SIZE;
 
+                printf("register page %x\n", page -> va);
                 register_page(page);
                 total_read_bytes -= page -> read_bytes;
                 l_addr += page -> read_bytes;
             }
 
-            memcpy(*load_addr + phdr[i].p_vaddr, src + phdr[i].p_offset, phdr[i].p_filesz);
+            // memcpy(*load_addr + phdr[i].p_vaddr, src + phdr[i].p_offset, phdr[i].p_filesz);
 
-            if (!(phdr[i].p_flags & PF_W))
-            {
-                mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_READ | PROT_WRITE);
-            }
+            // if (!(phdr[i].p_flags & PF_W))
+            // {
+            //     mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_READ | PROT_WRITE);
+            // }
 
-            if (phdr[i].p_flags & PF_X)
-            {
-                mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_EXEC | PROT_WRITE);
-            }
+            // if (phdr[i].p_flags & PF_X)
+            // {
+            //     mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_EXEC | PROT_WRITE);
+            // }
             break; 
         }
     }
@@ -162,12 +164,10 @@ bool relocate_section(void * src, void * dst, Elf32_Shdr * shdr, Elf32_Sym * sym
         char * sym = strings + syms[ELF32_R_SYM(rel[j].r_info)].st_name;
         switch (ELF32_R_TYPE(rel[j].r_info)){
             case R_386_RELATIVE:
-                load_page(dst + rel[j].r_offset);
                 *(Elf32_Word*)(dst + rel[j].r_offset) += (Elf32_Word) dst;
                 break;
             case R_386_JMP_SLOT:
             case R_386_GLOB_DAT:
-                load_page(dst + rel[j].r_offset);
                 *(Elf32_Word*)(dst + rel[j].r_offset) = (Elf32_Word)load_dl(sym);
                 break;
         }

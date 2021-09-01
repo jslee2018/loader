@@ -13,10 +13,14 @@ void page_init(int fd){
     front = NULL;
     back = NULL;
     file = fd;
-    map_addr = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    map_addr = NULL;
+    printf("page init %x\n", map_addr);
 }
 
 void * get_map_addr(){
+    if(!map_addr)
+        map_addr = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+
     return map_addr;
 }
 
@@ -53,21 +57,23 @@ struct page * remove_page(struct page * page){
 }
 
 void * load_page(void * va){
-    if(!map_addr)
+    if(va < get_map_addr()){
         return NULL;
-    
-    if(va < map_addr)
-        return NULL;
+    }
+
 
     int index = ((va - map_addr) & 0xfffff000);
 
     struct page * page;
 
+    void * mmap_addr;
+
     if(!(page = get_page((int)map_addr + index))){
         return NULL;
     }
 
-    mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    if(page -> va != map_addr)
+        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_FIXED, 0, 0);
 
     lseek(file, page -> file_offset, SEEK_SET);
     
