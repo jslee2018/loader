@@ -73,7 +73,7 @@ void * load_page(void * va){
     }
 
     if(page -> va != map_addr)
-        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_FIXED, 0, 0);
+        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
 
     lseek(file, page -> file_offset, SEEK_SET);
     

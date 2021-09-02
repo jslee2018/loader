@@ -18,8 +18,8 @@
 
 typedef char bool;
 
-void * load_elf(void * src, void ** dest);
-void * find_entry(void * src, void ** load_addr);
-bool elf_check_valid(void * src);
-bool load_segment(void * src, void ** load_addr);
-bool relocate(void * src, void ** load_addr);
+void * load_elf(int file, void ** dest);
+void * find_entry(Elf32_Ehdr * ehdr, void ** load_addr);
+bool elf_check_valid(Elf32_Ehdr * ehdr);
+bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr);
+bool relocate(int file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr);

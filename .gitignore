@@ -1,9 +1,4 @@
-tests/test_2lib.o
-tests/test_bss.o
-tests/test_stk.o
-tests/test.o
-tests/build/test
-tests/build/test_2lib
-tests/build/test_bss
-tests/build/test_stk
-loader
+*.o
+tests/build
+apager
+dpager
