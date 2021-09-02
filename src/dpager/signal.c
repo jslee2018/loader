@@ -7,8 +7,8 @@
 static void sigsegv_handler(int signal, siginfo_t *sip, ucontext_t * ucp){
     printf("fault addr %x\n", (long) sip -> si_addr);
     if(!load_page(sip -> si_addr)){
-        printf("load page failed\n");
-        exit(0);
+        printf("segmentation error\n");
+        exit(-1);
     }
     
     return;
@@ -24,4 +24,3 @@ void register_handler(){
     sigaction(SIGSEGV, &sa, NULL);
     
 }
-

@@ -17,12 +17,11 @@ int jump_entry(void * entry, int argc, char * argv[], char ** envp){
         "push %2 \n"
         "push %1 \n"
         "mov %3, %%edi \n"
-        "mov %4, %%edx \n"
+        "mov $0x0, %%edx \n"
         "jmp %3"
         : "=r" (result)
         : "r" (argc) ,
         "r" (argv) ,
-        "r" (entry) ,
-        "r" (*(int *)(envp - 0x1c))
+        "r" (entry)
         );
 }
