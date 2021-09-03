@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -5,12 +6,12 @@
 #include "loadelf.h"
 
 static void * map_addr;
-static int file;
+static FILE * file;
 
 static struct page * front;
 static struct page * back;
 
-void page_init(int fd){
+void page_init(FILE * fd){
     front = NULL;
     back = NULL;
     file = fd;
@@ -32,6 +33,8 @@ void * register_page(struct page * page){
         back -> next = page;
         back = page;
     }
+
+    mprotect(page -> va, PAGE_SIZE, PROT_WRITE);
 
     return page -> va;
 }
@@ -66,26 +69,35 @@ void * load_page(void * va){
 
     struct page * page;
 
-    void * mmap_addr;
+    void * mmap_addr = 1;
 
     if(!(page = get_page((int)map_addr + index))){
         return NULL;
     }
 
-    printf("load page %x\n", page -> va);
+    // printf("load page %x\n", page -> va);
+
+    mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
 
     if(page -> va != map_addr)
-        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
+        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_FIXED, 0, 0);
 
-    lseek(file, page -> file_offset, SEEK_SET);
+    fseek(file, page -> file_offset, SEEK_SET);
+    fread(page -> load_addr, 1, page -> read_bytes, file);
     
-    read(file, page -> load_addr, page -> read_bytes);
+    // read(file, page -> load_addr, page -> read_bytes);
 
     if (!(page -> flags & PF_W))
         mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
 
     if (page -> flags & PF_X)
         mprotect(page -> va, PAGE_SIZE, PROT_EXEC | PROT_WRITE);
+
+    if(mmap_addr == -1){
+        printf("load failed\n");
+    }
+
+    // printf("load done\n");
 
     return page->va;
 }

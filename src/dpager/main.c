@@ -9,14 +9,10 @@
 #include "page.h"
 #include "signal.h"
 
-void bp(){
-    return;
-}
+
 
 int main(int argc, char * argv[], char ** envp){
-    bp();
     char * file_name;
-    char * file_raw;
     void * load_addr;
     void * entry;
     
@@ -27,14 +23,14 @@ int main(int argc, char * argv[], char ** envp){
 
     register_handler();
 
-    int file = open(file_name, O_RDONLY);
+    FILE * file = fopen(file_name, "rb");
 
-    page_init(file);
-
-    if(file == -1){
+    if(!file){
         printf("load file failed\n");
         return -1;
     }
+
+    page_init(file);
 
     entry = load_elf(file, &load_addr);
 

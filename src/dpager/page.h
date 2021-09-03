@@ -10,7 +10,7 @@ struct page{
     struct page * next;
 };
 
-void page_init(int fd);
+void page_init(FILE * fd);
 void * load_page(void * va);
 void * get_map_addr(void);
 void * register_page(struct page * page);

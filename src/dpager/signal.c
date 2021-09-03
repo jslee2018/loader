@@ -4,6 +4,10 @@
 #include "signal.h"
 #include "page.h"
 
+void bp2(){
+    return;
+}
+
 static void sigsegv_handler(int signal, siginfo_t *sip, ucontext_t * ucp){
     printf("fault addr %x\n", (long) sip -> si_addr);
     if(!load_page(sip -> si_addr)){
@@ -11,6 +15,7 @@ static void sigsegv_handler(int signal, siginfo_t *sip, ucontext_t * ucp){
         exit(-1);
     }
     
+    bp2();
     return;
 }
 

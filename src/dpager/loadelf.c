@@ -8,9 +8,9 @@
 
 static void * handle;
 
-void * load_elf(int file, void ** dest){
+void * load_elf(FILE * file, void ** dest){
     Elf32_Ehdr * ehdr = (Elf32_Ehdr *) malloc(sizeof(Elf32_Ehdr));
-    read(file, ehdr, sizeof(Elf32_Ehdr));
+    fread(ehdr, sizeof(Elf32_Ehdr), 1, file);
 
     if(!elf_check_valid(ehdr)){
         printf("not valid elf\n");
@@ -18,8 +18,10 @@ void * load_elf(int file, void ** dest){
     }
 
     Elf32_Phdr * phdr = (Elf32_Phdr *) malloc(sizeof(Elf32_Phdr) * ehdr -> e_phnum);
-    lseek(file, ehdr -> e_phoff, SEEK_SET);
-    read(file, phdr, sizeof(Elf32_Phdr) * ehdr -> e_phnum);
+    fseek(file, ehdr -> e_phoff, SEEK_SET);
+    fread(phdr, sizeof(Elf32_Phdr), ehdr -> e_phnum, file);
+    // lseek(file, ehdr -> e_phoff, SEEK_SET);
+    // read(file, phdr, sizeof(Elf32_Phdr) * ehdr -> e_phnum);
 
     if(!load_segment(ehdr, phdr, dest)){
         printf("load_segment failed\n");
@@ -27,8 +29,9 @@ void * load_elf(int file, void ** dest){
     }
 
     Elf32_Shdr * shdr = (Elf32_Shdr *) malloc(sizeof(Elf32_Shdr) * ehdr -> e_shnum);
-    lseek(file, ehdr -> e_shoff, SEEK_SET);
-    read(file, shdr, sizeof(Elf32_Shdr) * ehdr -> e_shnum);
+    fseek(file, ehdr -> e_shoff, SEEK_SET);
+    fread(shdr, sizeof(Elf32_Shdr), ehdr -> e_shnum, file);
+    // read(file, shdr, sizeof(Elf32_Shdr) * ehdr -> e_shnum);
     
     if(!relocate(file, ehdr, shdr, dest)){
         printf("relocate failed\n");
@@ -140,7 +143,7 @@ bool relocate_section(Elf32_Rel* rel, void * dst, Elf32_Shdr * shdr, Elf32_Sym *
     return true;
 }
 
-bool relocate(int file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr){
+bool relocate(FILE * file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr){
     if(ehdr -> e_shentsize != sizeof(Elf32_Shdr)){
         printf("invalid shentsize\n");
         return NULL;
@@ -149,19 +152,21 @@ bool relocate(int file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr)
     Elf32_Shdr * dynsym = find_section(ehdr, shdr, SHT_DYNSYM);
 
     Elf32_Sym * syms = (Elf32_Sym *) malloc(dynsym -> sh_size);
-    lseek(file, dynsym -> sh_offset, SEEK_SET);
-    read(file, syms, dynsym -> sh_size);
+    fseek(file, dynsym -> sh_offset, SEEK_SET);
+    fread(syms, 1, dynsym -> sh_size, file);
+    // read(file, syms, dynsym -> sh_size);
 
     char * strings = malloc(shdr[dynsym -> sh_link].sh_size);
-    lseek(file, shdr[dynsym -> sh_link].sh_offset, SEEK_SET);
-    read(file, strings, shdr[dynsym -> sh_link].sh_size);
+    fseek(file, shdr[dynsym -> sh_link].sh_offset, SEEK_SET);
+    fread(strings, 1, shdr[dynsym -> sh_link].sh_size, file);
+    // read(file, strings, shdr[dynsym -> sh_link].sh_size);
 
     int i;
     for(i = 0; i < ehdr -> e_shentsize; i++){
         if(shdr[i].sh_type == SHT_REL){
             Elf32_Rel* rel = (Elf32_Rel*) malloc(shdr[i].sh_size);
-            lseek(file, shdr[i].sh_offset, SEEK_SET);
-            read(file, rel, shdr[i].sh_size);
+            fseek(file, shdr[i].sh_offset, SEEK_SET);
+            fread(rel, 1, shdr[i].sh_size, file);
 
             if(!relocate_section(rel, *load_addr, shdr + i, syms, strings))
                 return false;
