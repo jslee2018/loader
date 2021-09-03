@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "page.h"
+#include "loadelf.h"
 
 static void * map_addr;
 static int file;
@@ -61,7 +62,6 @@ void * load_page(void * va){
         return NULL;
     }
 
-
     int index = ((va - map_addr) & 0xfffff000);
 
     struct page * page;
@@ -72,12 +72,20 @@ void * load_page(void * va){
         return NULL;
     }
 
+    printf("load page %x\n", page -> va);
+
     if(page -> va != map_addr)
         mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
 
     lseek(file, page -> file_offset, SEEK_SET);
     
     read(file, page -> load_addr, page -> read_bytes);
+
+    if (!(page -> flags & PF_W))
+        mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
+
+    if (page -> flags & PF_X)
+        mprotect(page -> va, PAGE_SIZE, PROT_EXEC | PROT_WRITE);
 
     return page->va;
 }

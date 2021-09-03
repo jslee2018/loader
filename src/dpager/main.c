@@ -22,7 +22,7 @@ int main(int argc, char * argv[], char ** envp){
     
     if(argc < 2)
         return -1;
-    
+
     file_name = argv[1];
 
     register_handler();

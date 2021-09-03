@@ -79,6 +79,7 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
                 page -> va = (int) get_map_addr() + l_addr & 0xfffff000;
                 page -> file_offset = phdr[i].p_offset;
                 page -> read_bytes = page -> va - page -> load_addr + PAGE_SIZE;
+                page -> flags = phdr[i].p_flags;
 
                 printf("register page %x\n", page -> va);
                 register_page(page);
@@ -87,16 +88,6 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
                 total_read_bytes -= page -> read_bytes;
                 l_addr += page -> read_bytes;
             }
-
-            // if (!(phdr[i].p_flags & PF_W))
-            // {
-            //     mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_READ | PROT_WRITE);
-            // }
-
-            // if (phdr[i].p_flags & PF_X)
-            // {
-            //     mprotect((unsigned char *) *load_addr + phdr[i].p_vaddr, phdr[i].p_memsz, PROT_EXEC | PROT_WRITE);
-            // }
             break; 
         }
     }

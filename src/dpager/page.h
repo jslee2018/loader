@@ -6,6 +6,7 @@ struct page{
     void * load_addr;
     int file_offset;
     int read_bytes;
+    unsigned flags;
     struct page * next;
 };
 
