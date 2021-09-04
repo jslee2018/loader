@@ -11,6 +11,46 @@ static FILE * file;
 static struct page * front;
 static struct page * back;
 
+void register_rel(void * addr, void * val, bool add){
+    struct rel * rel = malloc(sizeof(struct rel));
+
+    rel -> va = addr;
+    rel -> val = val;
+    rel -> add = add;
+    rel -> next = NULL;
+
+    struct page * page = get_page((unsigned) addr & 0xfffff000);
+
+    if(!page){
+        printf("page null\n");
+        exit(-1);
+    }
+
+    if(!page -> rel_front){
+        page -> rel_front = page -> rel_back = rel;
+    }else{
+        page -> rel_back -> next = rel;
+        page -> rel_back = rel;
+    }
+}
+
+void load_rel(struct page * page){
+    struct rel * probe = page -> rel_front;
+
+    while(probe != NULL){
+        if(probe -> add){
+            *(Elf32_Word *) (probe -> va) += (Elf32_Word) (probe -> val);
+        }else{
+            *(Elf32_Word *) (probe -> va) = (Elf32_Word) (probe -> val);
+        }
+        struct rel * temp = probe;
+        probe = probe -> next;
+
+        free(temp);
+    }
+
+}
+
 void page_init(FILE * fd){
     front = NULL;
     back = NULL;
@@ -79,9 +119,6 @@ void * load_page(void * va){
 
     mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
 
-    // if(page -> va != map_addr)
-    //     mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
-
     fseek(file, page -> file_offset, SEEK_SET);
     fread(page -> load_addr, 1, page -> read_bytes, file);
     
@@ -93,9 +130,7 @@ void * load_page(void * va){
     if (page -> flags & PF_X)
         mprotect(page -> va, PAGE_SIZE, PROT_EXEC | PROT_WRITE);
 
-    if(mmap_addr == -1){
-        printf("load failed\n");
-    }
+    load_rel(page);
 
     // printf("load done\n");
 

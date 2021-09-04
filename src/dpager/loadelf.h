@@ -3,6 +3,8 @@
 #define true 1
 #define false 0
 
+typedef char bool;
+
 #define R_386_NONE	0
 #define R_386_32	1
 #define R_386_PC32	2
@@ -15,8 +17,6 @@
 #define R_386_GOTOFF	9
 #define R_386_GOTPC	10
 #define R_386_NUM	11
-
-typedef char bool;
 
 void * dl_init(void);
 void * load_elf(FILE * file, void ** dest);
