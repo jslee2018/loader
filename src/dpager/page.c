@@ -61,8 +61,9 @@ void page_init(FILE * fd){
 
 void * get_map_addr(unsigned length){
     if(!map_addr){
-        map_addr = mmap(NULL, length, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+        map_addr = mmap(NULL, length + PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
         mprotect(map_addr, length, PROT_NONE);
+        mprotect(map_addr + length, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC);
     }
 
     return map_addr;

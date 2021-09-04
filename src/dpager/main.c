@@ -15,6 +15,7 @@ int main(int argc, char * argv[], char ** envp){
     char * file_name;
     void * load_addr;
     void * entry;
+    void * stack;
     
     if(argc < 2)
         return -1;
@@ -33,14 +34,14 @@ int main(int argc, char * argv[], char ** envp){
 
     page_init(file);
 
-    entry = load_elf(file, &load_addr);
+    entry = load_elf(file, &load_addr, &stack);
 
     if(!entry){
         printf("NULL entry\n");
         return 0;
     }
 
-    jump_entry(entry, argc - 1, &argv[1], envp);
+    jump_entry(entry, argc - 1, &argv[1], envp, stack);
 
     printf("don't print\n");
 

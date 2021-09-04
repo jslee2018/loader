@@ -12,7 +12,7 @@ void * dl_init(){
     handle = dlopen("libc.so.6", RTLD_NOW);
 }
 
-void * load_elf(FILE * file, void ** dest){
+void * load_elf(FILE * file, void ** dest, void ** stack){
     Elf32_Ehdr * ehdr = (Elf32_Ehdr *) malloc(sizeof(Elf32_Ehdr));
     fread(ehdr, sizeof(Elf32_Ehdr), 1, file);
 
@@ -27,7 +27,7 @@ void * load_elf(FILE * file, void ** dest){
     // lseek(file, ehdr -> e_phoff, SEEK_SET);
     // read(file, phdr, sizeof(Elf32_Phdr) * ehdr -> e_phnum);
 
-    if(!load_segment(ehdr, phdr, dest)){
+    if(!load_segment(ehdr, phdr, dest, stack)){
         printf("load_segment failed\n");
         return NULL;
     }
@@ -58,7 +58,7 @@ bool elf_check_valid(Elf32_Ehdr * ehdr){
     return true;
 }
 
-bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
+bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr, void ** stack){
 
     unsigned length = 0;
 
@@ -82,6 +82,8 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
     length = (length / PAGE_SIZE + (length % PAGE_SIZE != 0)) * PAGE_SIZE;
 
     *load_addr = get_map_addr(length);
+
+    *stack = *load_addr + length + PAGE_SIZE;
 
     for(i = 0; i < ehdr -> e_phnum; i++){
         switch (phdr[i].p_type)

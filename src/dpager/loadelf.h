@@ -19,8 +19,8 @@ typedef char bool;
 #define R_386_NUM	11
 
 void * dl_init(void);
-void * load_elf(FILE * file, void ** dest);
+void * load_elf(FILE * file, void ** dest, void ** stack);
 void * find_entry(Elf32_Ehdr * ehdr, void ** load_addr);
 bool elf_check_valid(Elf32_Ehdr * ehdr);
-bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr);
+bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr, void ** stack);
 bool relocate(FILE * file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr);
