@@ -1,18 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void bp2(){
-    return;
-}
-
-int jump_entry(void * entry, int argc, char * argv[], char ** envp){
-    // int (*func)() = entry;
-
-    // func();
+int jump_entry(void * entry, int argc, char * argv[], char ** envp, void * stack){
 
     int result;
     asm volatile(
-        "and $0xfffffff0, %%esp \n"
+        "mov %4, %%esp \n"
         "sub $0x8, %%esp \n"
         "push %2 \n"
         "push %1 \n"
@@ -22,6 +15,7 @@ int jump_entry(void * entry, int argc, char * argv[], char ** envp){
         : "=r" (result)
         : "r" (argc) ,
         "r" (argv) ,
-        "r" (entry)
+        "r" (entry),
+        "r" (stack)
         );
 }

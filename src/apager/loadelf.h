@@ -3,6 +3,8 @@
 #define true 1
 #define false 0
 
+typedef char bool;
+
 #define R_386_NONE	0
 #define R_386_32	1
 #define R_386_PC32	2
@@ -16,10 +18,11 @@
 #define R_386_GOTPC	10
 #define R_386_NUM	11
 
-typedef char bool;
+#define PAGE_SIZE 4096
 
-void * load_elf(void * src, void ** dest);
-void * find_entry(void * src, void ** load_addr);
-bool elf_check_valid(void * src);
-bool load_segment(void * src, void ** load_addr);
-bool relocate(void * src, void ** load_addr);
+void * dl_init(void);
+void * load_elf(FILE * file, void ** dest, void ** stack);
+void * find_entry(Elf32_Ehdr * ehdr, void ** load_addr);
+bool elf_check_valid(Elf32_Ehdr * ehdr);
+bool load_segment(FILE * file, Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr, void ** stack);
+bool relocate(FILE * file, Elf32_Ehdr * ehdr, Elf32_Shdr * shdr, void ** load_addr);

@@ -6,8 +6,6 @@
 #include <sys/stat.h>
 #include "loadelf.h"
 #include "call.h"
-#include "page.h"
-#include "signal.h"
 
 
 

@@ -96,12 +96,13 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr, void 
 
             int total_read_bytes = phdr[i].p_filesz;
             int l_addr = phdr[i].p_vaddr;
+            int file_off = phdr[i].p_offset;
 
             while(total_read_bytes > 0){
                 struct page * page = malloc(sizeof(struct page));
                 page -> load_addr = (int) get_map_addr(length) + l_addr;
                 page -> va = (int) get_map_addr(length) + l_addr & 0xfffff000;
-                page -> file_offset = phdr[i].p_offset;
+                page -> file_offset = file_off;
                 page -> read_bytes = page -> va - page -> load_addr + PAGE_SIZE;
                 page -> flags = phdr[i].p_flags;
 
@@ -110,6 +111,7 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr, void 
                     load_page(page -> va);
                 total_read_bytes -= page -> read_bytes;
                 l_addr += page -> read_bytes;
+                file_off += page -> read_bytes;
             }
             break; 
         }
