@@ -16,12 +16,14 @@ void page_init(FILE * fd){
     back = NULL;
     file = fd;
     map_addr = NULL;
-    printf("page init %x\n", map_addr);
+    // printf("page init %x\n", map_addr);
 }
 
-void * get_map_addr(){
-    if(!map_addr)
-        map_addr = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+void * get_map_addr(unsigned length){
+    if(!map_addr){
+        map_addr = mmap(NULL, length, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+        mprotect(map_addr, length, PROT_NONE);
+    }
 
     return map_addr;
 }
@@ -33,8 +35,6 @@ void * register_page(struct page * page){
         back -> next = page;
         back = page;
     }
-
-    mprotect(page -> va, PAGE_SIZE, PROT_WRITE);
 
     return page -> va;
 }
@@ -61,7 +61,7 @@ struct page * remove_page(struct page * page){
 }
 
 void * load_page(void * va){
-    if(va < get_map_addr()){
+    if(va < get_map_addr(NULL)){
         return NULL;
     }
 
@@ -79,8 +79,8 @@ void * load_page(void * va){
 
     mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
 
-    if(page -> va != map_addr)
-        mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_FIXED, 0, 0);
+    // if(page -> va != map_addr)
+    //     mmap_addr = mmap(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
 
     fseek(file, page -> file_offset, SEEK_SET);
     fread(page -> load_addr, 1, page -> read_bytes, file);

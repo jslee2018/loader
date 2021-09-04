@@ -18,6 +18,7 @@
 
 typedef char bool;
 
+void * dl_init(void);
 void * load_elf(FILE * file, void ** dest);
 void * find_entry(Elf32_Ehdr * ehdr, void ** load_addr);
 bool elf_check_valid(Elf32_Ehdr * ehdr);

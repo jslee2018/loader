@@ -22,6 +22,7 @@ int main(int argc, char * argv[], char ** envp){
     file_name = argv[1];
 
     register_handler();
+    dl_init();
 
     FILE * file = fopen(file_name, "rb");
 

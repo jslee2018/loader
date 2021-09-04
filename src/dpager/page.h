@@ -12,5 +12,5 @@ struct page{
 
 void page_init(FILE * fd);
 void * load_page(void * va);
-void * get_map_addr(void);
+void * get_map_addr(unsigned length);
 void * register_page(struct page * page);

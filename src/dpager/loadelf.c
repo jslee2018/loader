@@ -8,6 +8,10 @@
 
 static void * handle;
 
+void * dl_init(){
+    handle = dlopen("libc.so.6", RTLD_NOW);
+}
+
 void * load_elf(FILE * file, void ** dest){
     Elf32_Ehdr * ehdr = (Elf32_Ehdr *) malloc(sizeof(Elf32_Ehdr));
     fread(ehdr, sizeof(Elf32_Ehdr), 1, file);
@@ -56,7 +60,7 @@ bool elf_check_valid(Elf32_Ehdr * ehdr){
 
 bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
 
-    *load_addr = get_map_addr();
+    unsigned length = 0;
 
     if(ehdr -> e_phentsize != sizeof(Elf32_Phdr)){
         printf("invalid phentsize\n");
@@ -64,6 +68,21 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
     }
 
     int i;
+    for(i = 0; i < ehdr -> e_phnum; i++){
+        switch (phdr[i].p_type)
+        {
+        case PT_LOAD:
+            if(length < phdr[i].p_memsz + phdr[i].p_vaddr){
+                length = phdr[i].p_memsz + phdr[i].p_vaddr;
+            }
+            break; 
+        }
+    }
+
+    length = (length / PAGE_SIZE + (length % PAGE_SIZE != 0)) * PAGE_SIZE;
+
+    *load_addr = get_map_addr(length);
+
     for(i = 0; i < ehdr -> e_phnum; i++){
         switch (phdr[i].p_type)
         {
@@ -78,13 +97,12 @@ bool load_segment(Elf32_Ehdr * ehdr, Elf32_Phdr * phdr, void ** load_addr){
 
             while(total_read_bytes > 0){
                 struct page * page = malloc(sizeof(struct page));
-                page -> load_addr = (int) get_map_addr() + l_addr;
-                page -> va = (int) get_map_addr() + l_addr & 0xfffff000;
+                page -> load_addr = (int) get_map_addr(length) + l_addr;
+                page -> va = (int) get_map_addr(length) + l_addr & 0xfffff000;
                 page -> file_offset = phdr[i].p_offset;
                 page -> read_bytes = page -> va - page -> load_addr + PAGE_SIZE;
                 page -> flags = phdr[i].p_flags;
 
-                printf("register page %x\n", page -> va);
                 register_page(page);
                 if(!l_addr)
                     load_page(page -> va);

@@ -21,7 +21,7 @@ ls -1 ./tests/build | while read line; do
     ./apager ./tests/build/$line
 done
 
-# ls -1 ./tests/build | while read line; do
-#     echo test dpager with $line
-#     ./dpager ./tests/build/$line
-# done
+ls -1 ./tests/build | while read line; do
+    echo test dpager with $line
+    ./dpager ./tests/build/$line
+done

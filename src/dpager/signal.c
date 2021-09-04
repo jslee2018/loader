@@ -9,7 +9,7 @@ void bp2(){
 }
 
 static void sigsegv_handler(int signal, siginfo_t *sip, ucontext_t * ucp){
-    printf("fault addr %x\n", (long) sip -> si_addr);
+    // printf("fault addr %x\n", (long) sip -> si_addr);
     if(!load_page(sip -> si_addr)){
         printf("segmentation error\n");
         exit(-1);

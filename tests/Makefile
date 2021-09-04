@@ -7,7 +7,7 @@ OBJECT = $(shell ls | grep .c | tr '.c' '.o')
 all: $(TARGET)
 
 $(TARGET): $(OBJECT)
-	$(CC) $(CFLAGS) -o $(BUILD)/$@ $@.o 
+	$(CC) $(CFLAGS) -o $(BUILD)/$@ $@.o
 
 clean:
 	rm -f *.o
