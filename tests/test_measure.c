@@ -1,9 +1,6 @@
 #include <stdio.h>
-#include <time.h>
 
 int main(){
-
-    clock_t start = clock();
     int pid = getpid();
     char target[30], buf[4096];
 
@@ -16,7 +13,7 @@ int main(){
     int mem;
     char* ptr = strstr(buf, "VmPeak:");
     sscanf(ptr, "%*s %d", &mem);
-    printf("Use %dB, time: %fms\n", mem, clock() - start);
+    printf("Use %dB\n", mem);
 
     printf("test pass\n");
 
