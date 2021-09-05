@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/workspace/src/apager
+cd ./src/apager
 make
 rm -f *.o
 mv ./loader ../../apager
@@ -9,7 +9,7 @@ cd ../../tests
 make
 cd ..
 
-cd /home/workspace/src/dpager
+cd ./src/dpager
 make
 rm -f *.o
 mv ./loader ../../dpager
