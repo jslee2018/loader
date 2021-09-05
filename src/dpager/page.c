@@ -56,7 +56,6 @@ void page_init(FILE * fd){
     back = NULL;
     file = fd;
     map_addr = NULL;
-    // printf("page init %x\n", map_addr);
 }
 
 void * get_map_addr(unsigned length){
@@ -116,14 +115,10 @@ void * load_page(void * va){
         return NULL;
     }
 
-    // printf("load page %x\n", page -> va);
-
     mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
 
     fseek(file, page -> file_offset, SEEK_SET);
     fread(page -> load_addr, 1, page -> read_bytes, file);
-    
-    // read(file, page -> load_addr, page -> read_bytes);
 
     if (!(page -> flags & PF_W))
         mprotect(page -> va, PAGE_SIZE, PROT_READ | PROT_WRITE);
@@ -132,8 +127,6 @@ void * load_page(void * va){
         mprotect(page -> va, PAGE_SIZE, PROT_EXEC | PROT_WRITE);
 
     load_rel(page);
-
-    // printf("load done\n");
 
     return page->va;
 }
